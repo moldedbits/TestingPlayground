@@ -1,44 +1,17 @@
 language: android
-
-sudo: false
-
-cache:
-  directories:
-    - ${TRAVIS_BUILD_DIR}/gradle/caches/
-    - ${TRAVIS_BUILD_DIR}/gradle/wrapper/dists/
-
-notifications:
-  email: false
-
+jdk: oraclejdk8
 env:
   global:
-    - INSTALL_PKGS='build-tools-21.1.2'
-    - UPDATE_PKGS='platform-tools,tools,extra-android-m2repository'
-    - GRADLE_USER_HOME="${TRAVIS_BUILD_DIR}/gradle"
-    - ADB_INSTALL_TIMEOUT=8 # minutes (2 minutes by default)
-    - AVD_DEBUG='init,avd_config,nand_limits,keys,adb,adbserver,adbclient'
-    - ANDROID_LOG_TAGS='NetworkStats:S dalvikvm:S Zygote:S Resources:S *:D'
-    - ANDROID_SERIAL='emulator-5554'
-
-matrix:
-  include:
-    - env: AVD_TARGET=android-21
-  fast_finish: true
-
-before_install:
-  - ./execute inexistent install-and-update-sdk
-  - ./execute create-and-start-device wait-for-device-online
-
-install:
-  - ./gradlew --version # show version and download Gradle Wrapper when is not present in cache
-  - ./gradlew clean # clean project and download Android dependencies when are not present in cache
-  - ./gradlew assemble
-
-before_script:
-  - ./execute wait-for-device-ready inexistent
-
+    - ANDROID_TARGET=android-19
+    - ANDROID_ABI=armeabi-v7a
+android:
+  components:
+  - build-tools-21.1.2
+  - android-23
+  - extra-android-m2repository
 script:
-  - ./gradlew connectedCheck
-
-after_script:
-  - cat ${TRAVIS_BUILD_DIR}/espresso/*/app/build/outputs/androidTest-results/connected/* # show logs
+  - ./gradlew build assembleAndroidTest
+  - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell setprop dalvik.vm.dexo
