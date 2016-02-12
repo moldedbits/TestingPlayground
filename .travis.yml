@@ -19,8 +19,6 @@ env:
     - AVD_DEBUG='init,avd_config,nand_limits,keys,adb,adbserver,adbclient'
     - ANDROID_LOG_TAGS='NetworkStats:S dalvikvm:S Zygote:S Resources:S *:D'
     - ANDROID_SERIAL='emulator-5554'
-    - ANDROID_HOME='/usr/local/android-sdk'
-    - PATH="${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}"
 
 matrix:
   include:
