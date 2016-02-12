@@ -8,12 +8,9 @@ env:
     - ADB_INSTALL_TIMEOUT=15 # minutes (2 minutes by default)
 android:
   components:
-  - tools
-  - platform-tools
   - build-tools-21.1.2
   - android-23
   - extra-android-m2repository
-  - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
 script:
   - ./gradlew build assembleAndroidTest
   - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
