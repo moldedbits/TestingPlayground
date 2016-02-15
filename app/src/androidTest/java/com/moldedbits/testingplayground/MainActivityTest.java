@@ -1,6 +1,7 @@
 package com.moldedbits.testingplayground;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.view.WindowManager;
 
 import com.robotium.solo.Solo;
 
@@ -22,6 +23,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2 {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
         solo = new Solo(getInstrumentation(), getActivity());
+
+        getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+            }
+        });
+
         ApiHelper helper = Mockito.mock(ApiHelper.class);
         doReturn("{\"body\":\"test json response\"}").when(helper).getJsonFromServer();
         ((MainActivity) getActivity()).setHelper(helper);

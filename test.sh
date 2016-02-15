@@ -1,4 +1,4 @@
-emulator -avd Nexus_5X_API_23 &
+emulator -avd Nexus_5X_API_23 -no-skin -no-window &
 
 echo "waiting for device"
 adb wait-for-device
