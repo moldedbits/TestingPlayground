@@ -1,55 +1,42 @@
 package com.moldedbits.testingplayground;
 
-import android.test.ActivityInstrumentationTestCase2;
-import android.view.WindowManager;
+import android.support.test.espresso.matcher.ViewMatchers;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.LargeTest;
 
-import com.robotium.solo.Solo;
-
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
-public class MainActivityTest extends ActivityInstrumentationTestCase2 {
+@RunWith(AndroidJUnit4.class)
+@LargeTest
+public class MainActivityTest {
 
-    private Solo solo;
+    @Rule
+    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<MainActivity>(MainActivity.class) {
+        @Override
+        protected void afterActivityLaunched() {
+            super.afterActivityLaunched();
+            ApiHelper helper = Mockito.mock(ApiHelper.class);
+            doReturn("{\"body\":\"test json response\"}").when(helper).getJsonFromServer();
+            getActivity().setHelper(helper);
+        }
+    };
 
-    public MainActivityTest() {
-        super(MainActivity.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
-        solo = new Solo(getInstrumentation(), getActivity());
-
-        getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-            }
-        });
-
-        ApiHelper helper = Mockito.mock(ApiHelper.class);
-        doReturn("{\"body\":\"test json response\"}").when(helper).getJsonFromServer();
-        ((MainActivity) getActivity()).setHelper(helper);
-    }
-
+    @Test
     public void testUI() throws Exception {
-        solo.sleep(1000);
-        assertTrue(solo.searchText("Hello world"));
-        assertNotNull(solo.getView(R.id.button_1));
-        assertNotNull(solo.getView(R.id.button_2));
-
-        solo.clickOnButton(1);
-        solo.sleep(100);
-        assertTrue(solo.searchText("test json response"));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        solo.finishOpenedActivities();
-        super.tearDown();
+        onView(withText("Hello world!")).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
+        onView(withId(R.id.button_2)).perform(click());
+        onView(withText("{\"body\":\"test json response\"}")).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
     }
 }
